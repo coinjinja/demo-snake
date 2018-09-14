@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Snake</title>
+  <style>
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+
+  body {
+    background: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  canvas {
+    background: white;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    border-top: 8px solid #eee;
+  }
+  .button {
+    width: 80px;
+    height: 80px;
+    border-radius: 40px;
+    background: black;
+    color: white;
+    position: fixed;
+    text-align: center;
+    line-height: 70px;
+    font-size: 48px;
+  }
+  #up {
+    bottom: 130px;
+  }
+  #down {
+    bottom: 10px;
+  }
+  #left {
+    left: 50px;
+    bottom: 75px;
+  }
+  #right {
+    right: 50px;
+    bottom: 75px;
+  }
+  .life {
+    color: black;
+    position: fixed;
+    bottom: 0;
+    left: 24px;
+    font-size: 24px;
+  }
+  .score {
+    color: black;
+    position: fixed;
+    bottom: 0;
+    right: 24px;
+    font-size: 24px;
+  }
+  #gameover {
+    background: #fff;
+    font-size: 36px;
+    position: fixed;
+    top: 200px;
+    padding: 8px 16px;
+    display: none;
+  }
+  </style>
+</head>
+<body>
+<canvas width="400" height="400" id="game"></canvas>
+<div class="button" id="up">↑</div>
+<div class="button" id="down">↓</div>
+<div class="button" id="left">←</div>
+<div class="button" id="right">→</div>
+<div class="life">Life: <span id="life">3</span></div>
+<div class="score">Score: <span id="score">0</span></div>
+<div id="gameover">Gameover</div>
+<script src="./game.js"></script>
+</body>
+</html>
