@@ -2,39 +2,54 @@ import $ from 'jquery';
 import uuid from 'uuid/v4';
 import coinview from '@coinjinja/coinview-sdk';
 
-coinview.init('dbDGwDGQ')
+coinview.init('dbDGwDGQ');
 
 const canvas = document.getElementById('game');
 const context = canvas.getContext('2d');
 
-const grid = 16;
+const grid = 30;
 
 const baseFrameRate = 60;
-let speed = 10;
+let speed = 15;
 
 const snake = {
-  x: 160,
-  y: 160,
+  x: 300,
+  y: 300,
   dx: grid,
   dy: 0,
   cells: [],
   maxCells: 4,
 };
 const apple = {
-  x: 320,
-  y: 320,
+  x: getRandomInt(0, 23) * grid,
+  y: getRandomInt(0, 27) * grid,
 };
 
 let lastFrameTime = Date.now();
 let count = 0;
 let totalFrame = 0;
 let frameRate = 60;
-let running = false;
+let running = true;
+let isGameover = false;
 let score = 0;
-let direction = '';
+let direction = 'right';
 
 // TODO: fetch from server
-let life = 3;
+let life = parseInt(localStorage.getItem('life') || '3', 10);
+$('#life').text(life);
+if (life === 0) {
+  running = false
+}
+
+const eat = document.createElement('audio');
+eat.preload = 'auto';
+eat.src = 'sounds/eat.mp3';
+
+function playEat() {
+  eat.pause();
+  eat.currentTime = 0;
+  eat.play();
+}
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
@@ -83,18 +98,21 @@ function loop() {
   }
 
   // draw apple
-  context.fillStyle = 'red';
-  context.fillRect(apple.x, apple.y, grid - 1, grid - 1);
+  context.fillStyle = 'black';
+  context.lineWidth = 2;
+  context.strokeRect(apple.x, apple.y, grid, grid);
+  context.fillRect(apple.x + 6, apple.y + 6, 18, 18);
 
   // draw snake
-  context.fillStyle = 'green';
   snake.cells.forEach(function(cell, index) {
-    context.fillRect(cell.x, cell.y, grid - 1, grid - 1);
+    context.strokeRect(cell.x, cell.y, grid, grid);
+    context.fillRect(cell.x + 6, cell.y + 6, 18, 18);
 
     // snake ate apple
     if (cell.x === apple.x && cell.y === apple.y) {
+      playEat();
       snake.maxCells += 1;
-      score += 1
+      score += 100;
       $('#score').text(score);
 
       // Increase game speed
@@ -102,8 +120,8 @@ function loop() {
         speed -= 1;
       }
 
-      apple.x = getRandomInt(0, 25) * grid;
-      apple.y = getRandomInt(0, 25) * grid;
+      apple.x = getRandomInt(0, 23) * grid;
+      apple.y = getRandomInt(0, 27) * grid;
     }
 
     // check collision with all cells after this one (modified bubble sort)
@@ -126,91 +144,90 @@ function loop() {
 }
 
 function gameOver() {
+  $('#gameover').show();
+  isGameover = true;
   running = false;
-  score = 0;
   if (life > 0) {
-    life -= 1
+    life -= 1;
   }
+  localStorage.setItem('life', `${life}`);
 
   $('#score').text(0);
   $('#life').text(life);
+}
 
-  $('#gameover').show();
-
-  snake.x = 160;
-  snake.y = 160;
+function resetGame() {
+  $('#gameover').hide();
+  isGameover = false;
+  snake.x = 150;
+  snake.y = 150;
   snake.cells = [];
   snake.maxCells = 4;
   snake.dx = grid;
   snake.dy = 0;
 
-  apple.x = getRandomInt(0, 25) * grid;
-  apple.y = getRandomInt(0, 25) * grid;
+  speed = 15;
+  score = 0;
 
-  direction = ''
+  apple.x = getRandomInt(0, 23) * grid;
+  apple.y = getRandomInt(0, 27) * grid;
+
+  direction = 'right';
+  running = true;
 }
+
+$('#quit').on('click', () => coinview.navigate.close());
 
 $('body').ready(() => {
   FastClick.attach(document.body);
 
   $('.button').on('touchstart', function() {
-    if (life > 0) {
-      running = true;
-      $('#gameover').hide()
-    } else {
-      console.log('payment')
-      const traceId = uuid()
-      coinview.payment.create({
-        traceId,
-        assetId: '3d356f2b-a886-3693-bd2b-04c447ce2399',
-        amount: 10,
-        memo: 'SNAKE_DEMO_BUY_LIFE',
-        description: 'Buy 3 lifes in game',
-      }).then(res => {
-        const { traceId: traceIdRes, memo } = res
-        if (traceId === traceIdRes && memo === 'SNAKE_DEMO_BUY_LIFE') {
-          life += 3;
-          $('#life').text(life);
-        }
-      })
-      return
+    if (life === 0) {
+      console.log('payment');
+      const traceId = uuid();
+      coinview.payment
+        .create({
+          traceId,
+          assetId: '3d356f2b-a886-3693-bd2b-04c447ce2399',
+          amount: 10,
+          memo: 'SNAKE_DEMO_BUY_LIFE',
+          description: 'Buy 3 lifes in game',
+        })
+        .then((res) => {
+          const { traceId: traceIdRes, memo } = res;
+          if (traceId === traceIdRes && memo === 'SNAKE_DEMO_BUY_LIFE') {
+            life += 3;
+            localStorage.setItem('life', `${life}`);
+            $('#life').text(life);
+          }
+        });
+      return;
     }
 
     const type = $(this).attr('id');
-    if (type === 'up' && direction !== 'down') {
+    if (type === 'up' && direction !== 'down' && !isGameover) {
       snake.dy = -grid;
       snake.dx = 0;
-    } else if (type === 'down' && direction !== 'up') {
+    } else if (type === 'down' && direction !== 'up' && !isGameover) {
       snake.dy = grid;
       snake.dx = 0;
-    } else if (type === 'left' && direction !== 'right') {
+    } else if (type === 'left' && direction !== 'right' && !isGameover) {
       snake.dx = -grid;
       snake.dy = 0;
-    } else if (type === 'right' && direction !== 'left') {
+    } else if (type === 'right' && direction !== 'left' && !isGameover) {
       snake.dx = grid;
       snake.dy = 0;
+    } else if (type === 'restart') {
+      resetGame();
+    } else if (type === 'yes' && isGameover) {
+      resetGame();
+    } else if (type === 'no' && isGameover) {
+      coinview.navigate.close();
     } else {
       return;
     }
     direction = type;
   });
-});
-
-document.addEventListener('keydown', function(e) {
-  // prevent snake from backtracking on itself
-  if (e.which === 37 && snake.dx === 0) {
-    snake.dx = -grid;
-    snake.dy = 0;
-  } else if (e.which === 38 && snake.dy === 0) {
-    snake.dy = -grid;
-    snake.dx = 0;
-  } else if (e.which === 39 && snake.dx === 0) {
-    snake.dx = grid;
-    snake.dy = 0;
-  } else if (e.which === 40 && snake.dy === 0) {
-    snake.dy = grid;
-    snake.dx = 0;
-  }
 });
 
 requestAnimationFrame(loop);

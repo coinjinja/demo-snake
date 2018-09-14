@@ -4,82 +4,129 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Snake</title>
   <style>
+  @font-face  {
+    font-family: VisitorTT1BRK;
+    src: url('fonts/font.ttf');
+  }
   html, body {
     height: 100%;
     margin: 0;
   }
 
   body {
-    background: #eee;
+    font-family: VisitorTT1BRK;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: rgb(206, 204, 191);
   }
   canvas {
-    background: white;
-    width: 100%;
+    width: 345px;
+    height: 405px;
     position: fixed;
-    top: 0;
-    border-top: 8px solid #eee;
+    top: 95px;
+    z-index: 99;
+  }
+  #panel {
+    position: absolute;
+    width: 100%;
+    height: 297px;
+    bottom: 0;
+    z-index: 1;
+  }
+  #screen {
+    position: absolute;
+    width: 100%;
+    height: 435px;
+    top: 80px;
+    z-index: 1;
   }
   .button {
-    width: 80px;
-    height: 80px;
-    border-radius: 40px;
-    background: black;
-    color: white;
-    position: fixed;
-    text-align: center;
-    line-height: 70px;
-    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    position: absolute;
+    z-index: 5;
   }
   #up {
-    bottom: 130px;
+    left: 84px;
+    bottom: 210px;
   }
   #down {
-    bottom: 10px;
+    left: 84px;
+    bottom: 115px;
   }
   #left {
-    left: 50px;
-    bottom: 75px;
+    left: 36px;
+    bottom: 163px;
   }
   #right {
-    right: 50px;
-    bottom: 75px;
+    left: 132px;
+    bottom: 163px;
+  }
+  #restart {
+    width: 120px;
+    height: 24px;
+    left: 48px;
+    bottom: 43px;
+  }
+  #quit {
+    width: 120px;
+    height: 24px;
+    right: 48px;
+    bottom: 43px;
+  }
+  #yes {
+    bottom: 204px;
+    right: 44px;
+  }
+  #no {
+    right: 90px;
+    bottom: 122px;
   }
   .life {
     color: black;
-    position: fixed;
-    bottom: 0;
-    left: 24px;
-    font-size: 24px;
+    position: absolute;
+    top: 50px;
+    left: 15px;
+    font-size: 25px;
   }
   .score {
     color: black;
     position: fixed;
-    bottom: 0;
-    right: 24px;
-    font-size: 24px;
+    top: 50px;
+    right: 15px;
+    font-size: 25px;
   }
   #gameover {
-    background: #fff;
     font-size: 36px;
-    position: fixed;
-    top: 200px;
+    position: absolute;
+    top: 230px;
     padding: 8px 16px;
     display: none;
+    z-index: 10;
+    text-align: center;
   }
   </style>
 </head>
 <body>
-<canvas width="400" height="400" id="game"></canvas>
-<div class="button" id="up">↑</div>
-<div class="button" id="down">↓</div>
-<div class="button" id="left">←</div>
-<div class="button" id="right">→</div>
-<div class="life">Life: <span id="life">3</span></div>
+<canvas width="690" height="810" id="game"></canvas>
+<img id="screen" src="images/screen.png" />
+<img id="panel" src="images/panel.png" />
+<div class="button" id="up"></div>
+<div class="button" id="down"></div>
+<div class="button" id="left"></div>
+<div class="button" id="right"></div>
+<div class="button" id="restart"></div>
+<div class="button" id="quit"></div>
+<div class="button" id="yes"></div>
+<div class="button" id="no"></div>
+<div class="life">Life: <span id="life"></span></div>
 <div class="score">Score: <span id="score">0</span></div>
-<div id="gameover">Gameover</div>
+<div id="gameover">
+  Game over<br />
+  Retry?<br />
+  >> Y/N
+</div>
 <script src="./game.js"></script>
 </body>
 </html>
