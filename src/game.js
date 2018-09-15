@@ -2,7 +2,7 @@ import $ from 'jquery';
 import uuid from 'uuid/v4';
 import coinview from '@coinjinja/coinview-sdk';
 
-coinview.init('dbDGwDGQ');
+coinview.init('7Jqg3qm2');
 
 const canvas = document.getElementById('game');
 const context = canvas.getContext('2d');
@@ -182,7 +182,11 @@ $('body').ready(() => {
   FastClick.attach(document.body);
 
   $('.button').on('touchstart', function() {
+    const type = $(this).attr('id');
     if (life === 0) {
+      if (type === 'no') {
+        coinview.navigate.close();
+      }
       console.log('payment');
       const traceId = uuid();
       coinview.payment
@@ -204,7 +208,6 @@ $('body').ready(() => {
       return;
     }
 
-    const type = $(this).attr('id');
     if (type === 'up' && direction !== 'down' && !isGameover) {
       snake.dy = -grid;
       snake.dx = 0;
