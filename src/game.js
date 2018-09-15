@@ -178,37 +178,48 @@ function resetGame() {
 
 $('#quit').on('click', () => coinview.navigate.close());
 
+function buyMoreLife() {
+  const traceId = uuid();
+  // create the payment and prompt user to accept
+  coinview.payment
+    .create({
+      // the trace ID for the transaction
+      traceId,
+      // the asset for ECO Token
+      assetId: '3d356f2b-a886-3693-bd2b-04c447ce2399',
+      // requested amount
+      amount: 10,
+      // customizable field to define the transaction
+      memo: 'SNAKE_DEMO_BUY_LIFE',
+      // tell users what's the payment for
+      description: 'ライフx3を購入',
+    })
+    .then((res) => {
+      const { traceId: traceIdRes, memo } = res;
+      // check payment status
+      if (traceId === traceIdRes && memo === 'SNAKE_DEMO_BUY_LIFE') {
+        life += 3;
+        localStorage.setItem('life', `${life}`);
+        $('#life').text(life);
+      } else {
+        // TODO: handle the failed case
+      }
+    }).catch(e => {
+      // TODO: handle the failed case
+    });
+}
+
 $('body').ready(() => {
   FastClick.attach(document.body);
 
   $('.button').on('touchstart', function() {
     const type = $(this).attr('id');
     if (life === 0) {
-      if (type === 'no') {
+      if (type === 'no') { // press 'B'
         coinview.navigate.close();
       }
-      console.log('payment');
-      const traceId = uuid();
-      coinview.payment
-        .create({
-          traceId,
-          assetId: '3d356f2b-a886-3693-bd2b-04c447ce2399',
-          amount: 10,
-          memo: 'SNAKE_DEMO_BUY_LIFE',
-          description: 'Buy 3 lifes in game',
-        })
-        .then((res) => {
-          const { traceId: traceIdRes, memo } = res;
-          if (traceId === traceIdRes && memo === 'SNAKE_DEMO_BUY_LIFE') {
-            life += 3;
-            localStorage.setItem('life', `${life}`);
-            $('#life').text(life);
-          }
-        });
-      return;
-    }
-
-    if (type === 'up' && direction !== 'down' && !isGameover) {
+      buyMoreLife();
+    } else if (type === 'up' && direction !== 'down' && !isGameover) {
       snake.dy = -grid;
       snake.dx = 0;
     } else if (type === 'down' && direction !== 'up' && !isGameover) {
